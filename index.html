@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>월간 학습 진도표</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #22252b;
+      --muted: #747b8a;
+      --line: #e6e8ef;
+      --primary: #6574e6;
+      --primary-soft: #eef0ff;
+      --danger: #e45c68;
+      --success: #37a875;
+      --shadow: 0 10px 30px rgba(40, 48, 80, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Noto Sans KR", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1180px, calc(100% - 28px));
+      margin: 28px auto 60px;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      margin: 0 0 5px;
+      font-size: clamp(25px, 4vw, 38px);
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .month-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .month-label {
+      min-width: 130px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .btn,
+    .icon-btn {
+      border: 0;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      padding: 11px 15px;
+    }
+
+    .btn.secondary,
+    .icon-btn.secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .btn.danger {
+      background: var(--danger);
+    }
+
+    .btn.small {
+      padding: 7px 10px;
+      border-radius: 9px;
+      font-size: 13px;
+    }
+
+    .icon-btn {
+      padding: 9px 12px;
+      min-width: 42px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .card h2 {
+      margin: 0 0 16px;
+      font-size: 20px;
+    }
+
+    .summary-card {
+      grid-column: 1 / -1;
+    }
+
+    .overall-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .overall-rate {
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .progress {
+      width: 100%;
+      height: 13px;
+      background: #eceef4;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary), #9b79ed);
+      border-radius: inherit;
+      transition: width 0.25s ease;
+    }
+
+    .subject-progress-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .subject-progress {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .subject-progress:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .subject-progress-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+
+    .subject-progress-name {
+      font-weight: 800;
+    }
+
+    .subject-progress-number {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #4f5562;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      padding: 11px 12px;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .goal-list {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .goal-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 110px auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .goal-row .subject-name {
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .empty {
+      padding: 18px;
+      border: 1px dashed #cfd3df;
+      border-radius: 12px;
+      text-align: center;
+      color: var(--muted);
+      background: #fafbfe;
+    }
+
+    .calendar-card {
+      margin-bottom: 18px;
+    }
+
+    .calendar-head {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .weekday {
+      text-align: center;
+      padding: 8px 2px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .weekday:first-child {
+      color: #dc5968;
+    }
+
+    .weekday:last-child {
+      color: #4d75d5;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .day {
+      position: relative;
+      min-height: 112px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 9px;
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .day.other {
+      background: #f4f5f8;
+      color: #b0b4be;
+    }
+
+    .day.today {
+      outline: 2px solid var(--primary);
+    }
+
+    .day.selected {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+    }
+
+    .day-number {
+      display: inline-grid;
+      place-items: center;
+      min-width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .day.today .day-number {
+      background: var(--primary);
+      color: white;
+    }
+
+    .day-total {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--success);
+      margin-bottom: 4px;
+    }
+
+    .day-record {
+      display: block;
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #535967;
+      font-size: 11px;
+      margin: 2px 0;
+    }
+
+    .record-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+    }
+
+    .selected-date-title {
+      margin: -5px 0 14px;
+      color: var(--primary);
+      font-weight: 900;
+    }
+
+    .record-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .record-item {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 13px;
+    }
+
+    .record-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .record-subject {
+      font-weight: 900;
+    }
+
+    .record-count {
+      color: var(--primary);
+      font-weight: 900;
+    }
+
+    .record-note {
+      margin: 7px 0 0;
+      color: #656c79;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .record-buttons {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .backup-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .notice {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 24, 38, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal {
+      width: min(500px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 20px 70px rgba(20, 24, 38, 0.2);
+    }
+
+    .modal h3 {
+      margin: 0 0 16px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 800px) {
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .grid,
+      .record-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-card {
+        grid-column: auto;
+      }
+
+      .day {
+        min-height: 90px;
+        padding: 6px;
+      }
+
+      .day-record {
+        font-size: 10px;
+      }
+
+      .goal-row {
+        grid-template-columns: minmax(0, 1fr) 90px auto;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app {
+        width: min(100% - 16px, 1180px);
+        margin-top: 14px;
+      }
+
+      .card {
+        padding: 16px;
+        border-radius: 15px;
+      }
+
+      .month-control {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .month-label {
+        min-width: 100px;
+        font-size: 16px;
+      }
+
+      .calendar-head,
+      .calendar-grid {
+        gap: 3px;
+      }
+
+      .weekday {
+        font-size: 11px;
+      }
+
+      .day {
+        min-height: 78px;
+        border-radius: 8px;
+        padding: 5px;
+      }
+
+      .day-total {
+        font-size: 10px;
+      }
+
+      .day-record {
+        display: none;
+      }
+
+      .goal-row {
+        grid-template-columns: 1fr 85px;
+      }
+
+      .goal-row .btn {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div>
+        <h1>📚 월간 학습 진도표</h1>
+        <p>문제 풀이 기록을 남기고 월별 진도를 확인해요.</p>
+      </div>
+
+      <div class="month-control">
+        <button type="button" class="icon-btn secondary" id="prevMonth" aria-label="이전 달">‹</button>
+        <div class="month-label" id="monthLabel"></div>
+        <button type="button" class="icon-btn secondary" id="nextMonth" aria-label="다음 달">›</button>
+        <button type="button" class="btn secondary small" id="todayButton">오늘</button>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="card summary-card">
+        <div class="overall-row">
+          <div>
+            <h2>이번 달 전체 진도</h2>
+            <div id="overallText">0 / 0문제</div>
+          </div>
+          <div class="overall-rate" id="overallRate">0%</div>
+        </div>
+        <div class="progress"><div id="overallBar"></div></div>
+        <div class="subject-progress-list" id="subjectProgressList"></div>
+      </article>
+
+      <article class="card">
+        <h2>✏️ 공부 기록하기</h2>
+        <form id="recordForm" class="form-grid">
+          <label>
+            날짜
+            <input type="date" id="recordDate" required />
+          </label>
+
+          <label>
+            과목
+            <select id="recordSubject" required></select>
+          </label>
+
+          <label>
+            푼 문제 수
+            <input type="number" id="recordCount" min="1" step="1" placeholder="예: 10" required />
+          </label>
+
+          <label>
+            메모
+            <textarea id="recordNote" placeholder="예: 유형자산 1~10번, 오답 3개"></textarea>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="btn" id="saveRecordButton">기록 저장</button>
+            <button type="button" class="btn secondary" id="cancelEditButton" hidden>수정 취소</button>
+          </div>
+        </form>
+      </article>
+
+      <article class="card">
+        <h2>🎯 이번 달 목표 설정</h2>
+        <div class="goal-list" id="goalList"></div>
+
+        <form id="goalForm" class="form-grid">
+          <label>
+            새 과목 이름
+            <input type="text" id="newSubjectName" maxlength="30" placeholder="예: 재무회계" required />
+          </label>
+
+          <label>
+            목표 문제 수
+            <input type="number" id="newSubjectGoal" min="1" step="1" placeholder="예: 100" required />
+          </label>
+
+          <button type="submit" class="btn">과목 추가</button>
+        </form>
+      </article>
+    </section>
+
+    <section class="card calendar-card">
+      <h2>📅 학습 달력</h2>
+      <div class="calendar-head">
+        <div class="weekday">일</div>
+        <div class="weekday">월</div>
+        <div class="weekday">화</div>
+        <div class="weekday">수</div>
+        <div class="weekday">목</div>
+        <div class="weekday">금</div>
+        <div class="weekday">토</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
+
+    <section class="record-layout">
+      <article class="card">
+        <h2>📝 선택한 날짜의 기록</h2>
+        <div class="selected-date-title" id="selectedDateTitle"></div>
+        <div class="record-list" id="selectedRecordList"></div>
+      </article>
+
+      <article class="card">
+        <h2>💾 기록 백업</h2>
+        <div class="backup-row">
+          <button type="button" class="btn secondary" id="exportButton">백업 파일 내려받기</button>
+          <button type="button" class="btn secondary" id="importButton">백업 불러오기</button>
+          <button type="button" class="btn danger" id="resetButton">모든 기록 삭제</button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" hidden />
+        <p class="notice">
+          기록은 현재 브라우저에 저장됩니다. 브라우저 데이터를 지우거나 다른 기기를 사용하면 보이지 않을 수 있으니 가끔 백업해 주세요.
+        </p>
+      </article>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="goalModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="goalModalTitle">
+      <h3 id="goalModalTitle">목표 문제 수 수정</h3>
+      <form id="goalEditForm" class="form-grid">
+        <input type="hidden" id="editGoalSubjectId" />
+        <label>
+          과목 이름
+          <input type="text" id="editGoalName" maxlength="30" required />
+        </label>
+        <label>
+          목표 문제 수
+          <input type="number" id="editGoalCount" min="1" step="1" required />
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn secondary" id="closeGoalModal">취소</button>
+          <button type="submit" class="btn">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "studyTrackerData_v1";
+
+      const pad = (number) => String(number).padStart(2, "0");
+
+      const formatDateKey = (date) =>
+        `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+      const formatMonthKey = (date) =>
+        `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
+
+      const parseDateKey = (dateKey) => {
+        const [year, month, day] = dateKey.split("-").map(Number);
+        return new Date(year, month - 1, day);
+      };
+
+      const makeId = () =>
+        `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      let viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      let selectedDateKey = formatDateKey(today);
+      let editingRecordId = null;
+
+      const initialMonthKey = formatMonthKey(today);
+
+      const defaultData = {
+        subjects: [
+          { id: "subject-a", name: "A과목" },
+          { id: "subject-b", name: "B과목" }
+        ],
+        monthlyGoals: {
+          [initialMonthKey]: {
+            "subject-a": 100,
+            "subject-b": 200
+          }
+        },
+        records: []
+      };
+
+      function loadData() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (!saved) return structuredClone(defaultData);
+
+          const parsed = JSON.parse(saved);
+          if (
+            !parsed ||
+            !Array.isArray(parsed.subjects) ||
+            !parsed.monthlyGoals ||
+            !Array.isArray(parsed.records)
+          ) {
+            throw new Error("저장 데이터 형식이 올바르지 않습니다.");
+          }
+
+          return parsed;
+        } catch (error) {
+          console.error(error);
+          alert("저장된 데이터를 읽지 못해 기본값으로 시작합니다.");
+          return structuredClone(defaultData);
+        }
+      }
+
+      let data = loadData();
+
+      const elements = {
+        monthLabel: document.getElementById("monthLabel"),
+        prevMonth: document.getElementById("prevMonth"),
+        nextMonth: document.getElementById("nextMonth"),
+        todayButton: document.getElementById("todayButton"),
+        overallText: document.getElementById("overallText"),
+        overallRate: document.getElementById("overallRate"),
+        overallBar: document.getElementById("overallBar"),
+        subjectProgressList: document.getElementById("subjectProgressList"),
+        recordForm: document.getElementById("recordForm"),
+        recordDate: document.getElementById("recordDate"),
+        recordSubject: document.getElementById("recordSubject"),
+        recordCount: document.getElementById("recordCount"),
+        recordNote: document.getElementById("recordNote"),
+        saveRecordButton: document.getElementById("saveRecordButton"),
+        cancelEditButton: document.getElementById("cancelEditButton"),
+        goalList: document.getElementById("goalList"),
+        goalForm: document.getElementById("goalForm"),
+        newSubjectName: document.getElementById("newSubjectName"),
+        newSubjectGoal: document.getElementById("newSubjectGoal"),
+        calendarGrid: document.getElementById("calendarGrid"),
+        selectedDateTitle: document.getElementById("selectedDateTitle"),
+        selectedRecordList: document.getElementById("selectedRecordList"),
+        exportButton: document.getElementById("exportButton"),
+        importButton: document.getElementById("importButton"),
+        importFile: document.getElementById("importFile"),
+        resetButton: document.getElementById("resetButton"),
+        goalModal: document.getElementById("goalModal"),
+        goalEditForm: document.getElementById("goalEditForm"),
+        editGoalSubjectId: document.getElementById("editGoalSubjectId"),
+        editGoalName: document.getElementById("editGoalName"),
+        editGoalCount: document.getElementById("editGoalCount"),
+        closeGoalModal: document.getElementById("closeGoalModal")
+      };
+
+      function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+
+      function getMonthKey() {
+        return formatMonthKey(viewDate);
+      }
+
+      function ensureMonthGoals(monthKey) {
+        if (!data.monthlyGoals[monthKey]) {
+          const previousMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+          const previousGoals = data.monthlyGoals[formatMonthKey(previousMonth)] || {};
+
+          data.monthlyGoals[monthKey] = {};
+          data.subjects.forEach((subject) => {
+            data.monthlyGoals[monthKey][subject.id] =
+              Number(previousGoals[subject.id]) || 0;
+          });
+          saveData();
+        }
+      }
+
+      function subjectById(subjectId) {
+        return data.subjects.find((subject) => subject.id === subjectId);
+      }
+
+      function recordsForMonth(monthKey) {
+        return data.records.filter((record) => record.date.startsWith(monthKey));
+      }
+
+      function totalForSubject(monthKey, subjectId) {
+        return recordsForMonth(monthKey)
+          .filter((record) => record.subjectId === subjectId)
+          .reduce((sum, record) => sum + Number(record.count), 0);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function renderMonthHeader() {
+        elements.monthLabel.textContent =
+          `${viewDate.getFullYear()}년 ${viewDate.getMonth() + 1}월`;
+      }
+
+      function renderSubjectOptions() {
+        const currentValue = elements.recordSubject.value;
+        elements.recordSubject.innerHTML = "";
+
+        data.subjects.forEach((subject) => {
+          const option = document.createElement("option");
+          option.value = subject.id;
+          option.textContent = subject.name;
+          elements.recordSubject.appendChild(option);
+        });
+
+        if (data.subjects.some((subject) => subject.id === currentValue)) {
+          elements.recordSubject.value = currentValue;
+        }
+      }
+
+      function renderGoals() {
+        const monthKey = getMonthKey();
+        ensureMonthGoals(monthKey);
+        const goals = data.monthlyGoals[monthKey];
+
+        if (data.subjects.length === 0) {
+          elements.goalList.innerHTML =
+            '<div class="empty">먼저 과목을 추가해 주세요.</div>';
+          return;
+        }
+
+        elements.goalList.innerHTML = data.subjects
+          .map((subject) => {
+            const goal = Number(goals[subject.id]) || 0;
+            return `
+              <div class="goal-row">
+                <div class="subject-name">${escapeHtml(subject.name)}</div>
+                <div>${goal.toLocaleString()}문제</div>
+                <button type="button" class="btn secondary small edit-goal"
+                  data-subject-id="${subject.id}">수정</button>
+              </div>
+            `;
+          })
+          .join("");
+
+        elements.goalList.querySelectorAll(".edit-goal").forEach((button) => {
+          button.addEventListener("click", () => openGoalModal(button.dataset.subjectId));
+        });
+      }
+
+      function renderProgress() {
+        const monthKey = getMonthKey();
+        ensureMonthGoals(monthKey);
+        const goals = data.monthlyGoals[monthKey];
+
+        let totalGoal = 0;
+        let totalDone = 0;
+
+        const items = data.subjects.map((subject) => {
+          const goal = Number(goals[subject.id]) || 0;
+          const done = totalForSubject(monthKey, subject.id);
+          const rate = goal > 0 ? Math.min((done / goal) * 100, 100) : 0;
+
+          totalGoal += goal;
+          totalDone += done;
+
+          return `
+            <div class="subject-progress">
+              <div class="subject-progress-head">
+                <span class="subject-progress-name">${escapeHtml(subject.name)}</span>
+                <span class="subject-progress-number">
+                  ${done.toLocaleString()} / ${goal.toLocaleString()}문제
+                  · ${goal > 0 ? ((done / goal) * 100).toFixed(1) : "0.0"}%
+                </span>
+              </div>
+              <div class="progress"><div style="width:${rate}%"></div></div>
+            </div>
+          `;
+        });
+
+        const overallRate = totalGoal > 0 ? (totalDone / totalGoal) * 100 : 0;
+
+        elements.overallText.textContent =
+          `${totalDone.toLocaleString()} / ${totalGoal.toLocaleString()}문제`;
+        elements.overallRate.textContent = `${overallRate.toFixed(1)}%`;
+        elements.overallBar.style.width = `${Math.min(overallRate, 100)}%`;
+        elements.subjectProgressList.innerHTML =
+          items.join("") || '<div class="empty">등록된 과목이 없습니다.</div>';
+      }
+
+      function renderCalendar() {
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const start = new Date(year, month, 1 - firstDay.getDay());
+
+        elements.calendarGrid.innerHTML = "";
+
+        for (let index = 0; index < 42; index += 1) {
+          const date = new Date(start);
+          date.setDate(start.getDate() + index);
+
+          const dateKey = formatDateKey(date);
+          const isCurrentMonth = date.getMonth() === month;
+          const isToday = dateKey === formatDateKey(today);
+          const isSelected = dateKey === selectedDateKey;
+          const dayRecords = data.records.filter((record) => record.date === dateKey);
+          const total = dayRecords.reduce((sum, record) => sum + Number(record.count), 0);
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = [
+            "day",
+            isCurrentMonth ? "" : "other",
+            isToday ? "today" : "",
+            isSelected ? "selected" : ""
+          ].filter(Boolean).join(" ");
+
+          const recordLines = dayRecords.slice(0, 3).map((record) => {
+            const subject = subjectById(record.subjectId);
+            return `<span class="day-record">${escapeHtml(subject?.name || "삭제된 과목")} ${Number(record.count)}개</span>`;
+          }).join("");
+
+          button.innerHTML = `
+            <span class="day-number">${date.getDate()}</span>
+            ${total > 0 ? `<div class="day-total">총 ${total}문제</div>` : ""}
+            ${recordLines}
+            ${dayRecords.length > 3 ? `<span class="day-record">외 ${dayRecords.length - 3}건</span>` : ""}
+          `;
+
+          button.addEventListener("click", () => {
+            selectedDateKey = dateKey;
+            elements.recordDate.value = dateKey;
+
+            if (!isCurrentMonth) {
+              viewDate = new Date(date.getFullYear(), date.getMonth(), 1);
+              renderAll();
+            } else {
+              renderCalendar();
+              renderSelectedRecords();
+            }
+          });
+
+          elements.calendarGrid.appendChild(button);
+        }
+      }
+
+      function renderSelectedRecords() {
+        const selectedDate = parseDateKey(selectedDateKey);
+        elements.selectedDateTitle.textContent =
+          `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`;
+
+        const records = data.records
+          .filter((record) => record.date === selectedDateKey)
+          .sort((a, b) => a.createdAt - b.createdAt);
+
+        if (records.length === 0) {
+          elements.selectedRecordList.innerHTML =
+            '<div class="empty">이 날짜에는 아직 기록이 없어요.</div>';
+          return;
+        }
+
+        elements.selectedRecordList.innerHTML = records
+          .map((record) => {
+            const subject = subjectById(record.subjectId);
+            return `
+              <div class="record-item">
+                <div class="record-item-head">
+                  <span class="record-subject">${escapeHtml(subject?.name || "삭제된 과목")}</span>
+                  <span class="record-count">${Number(record.count).toLocaleString()}문제</span>
+                </div>
+                ${record.note ? `<p class="record-note">${escapeHtml(record.note)}</p>` : ""}
+                <div class="record-buttons">
+                  <button type="button" class="btn secondary small edit-record"
+                    data-record-id="${record.id}">수정</button>
+                  <button type="button" class="btn danger small delete-record"
+                    data-record-id="${record.id}">삭제</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        elements.selectedRecordList.querySelectorAll(".edit-record").forEach((button) => {
+          button.addEventListener("click", () => editRecord(button.dataset.recordId));
+        });
+
+        elements.selectedRecordList.querySelectorAll(".delete-record").forEach((button) => {
+          button.addEventListener("click", () => deleteRecord(button.dataset.recordId));
+        });
+      }
+
+      function renderAll() {
+        ensureMonthGoals(getMonthKey());
+        renderMonthHeader();
+        renderSubjectOptions();
+        renderGoals();
+        renderProgress();
+        renderCalendar();
+        renderSelectedRecords();
+      }
+
+      function resetRecordForm() {
+        editingRecordId = null;
+        elements.recordForm.reset();
+        elements.recordDate.value = selectedDateKey;
+        elements.saveRecordButton.textContent = "기록 저장";
+        elements.cancelEditButton.hidden = true;
+        renderSubjectOptions();
+      }
+
+      function editRecord(recordId) {
+        const record = data.records.find((item) => item.id === recordId);
+        if (!record) return;
+
+        editingRecordId = recordId;
+        elements.recordDate.value = record.date;
+        elements.recordSubject.value = record.subjectId;
+        elements.recordCount.value = record.count;
+        elements.recordNote.value = record.note || "";
+        elements.saveRecordButton.textContent = "수정 내용 저장";
+        elements.cancelEditButton.hidden = false;
+        elements.recordDate.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function deleteRecord(recordId) {
+        const record = data.records.find((item) => item.id === recordId);
+        if (!record) return;
+
+        if (!confirm("이 학습 기록을 삭제할까요?")) return;
+
+        data.records = data.records.filter((item) => item.id !== recordId);
+        saveData();
+        if (editingRecordId === recordId) resetRecordForm();
+        renderAll();
+      }
+
+      function openGoalModal(subjectId) {
+        const subject = subjectById(subjectId);
+        if (!subject) return;
+
+        const monthKey = getMonthKey();
+        ensureMonthGoals(monthKey);
+
+        elements.editGoalSubjectId.value = subjectId;
+        elements.editGoalName.value = subject.name;
+        elements.editGoalCount.value =
+          Number(data.monthlyGoals[monthKey][subjectId]) || 0;
+        elements.goalModal.classList.add("show");
+        elements.editGoalName.focus();
+      }
+
+      function closeGoalModal() {
+        elements.goalModal.classList.remove("show");
+      }
+
+      elements.recordForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const date = elements.recordDate.value;
+        const subjectId = elements.recordSubject.value;
+        const count = Number(elements.recordCount.value);
+        const note = elements.recordNote.value.trim();
+
+        if (!date || !subjectId || !Number.isInteger(count) || count <= 0) {
+          alert("날짜, 과목, 문제 수를 올바르게 입력해 주세요.");
+          return;
+        }
+
+        if (editingRecordId) {
+          const record = data.records.find((item) => item.id === editingRecordId);
+          if (!record) return;
+
+          record.date = date;
+          record.subjectId = subjectId;
+          record.count = count;
+          record.note = note;
+        } else {
+          data.records.push({
+            id: makeId(),
+            date,
+            subjectId,
+            count,
+            note,
+            createdAt: Date.now()
+          });
+        }
+
+        saveData();
+        selectedDateKey = date;
+        const savedDate = parseDateKey(date);
+        viewDate = new Date(savedDate.getFullYear(), savedDate.getMonth(), 1);
+        resetRecordForm();
+        renderAll();
+      });
+
+      elements.cancelEditButton.addEventListener("click", resetRecordForm);
+
+      elements.goalForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const name = elements.newSubjectName.value.trim();
+        const goal = Number(elements.newSubjectGoal.value);
+
+        if (!name || !Number.isInteger(goal) || goal <= 0) {
+          alert("과목 이름과 목표 문제 수를 올바르게 입력해 주세요.");
+          return;
+        }
+
+        const duplicate = data.subjects.some(
+          (subject) => subject.name.toLowerCase() === name.toLowerCase()
+        );
+        if (duplicate) {
+          alert("이미 같은 이름의 과목이 있습니다.");
+          return;
+        }
+
+        const subject = { id: makeId(), name };
+        data.subjects.push(subject);
+        ensureMonthGoals(getMonthKey());
+        data.monthlyGoals[getMonthKey()][subject.id] = goal;
+        saveData();
+
+        elements.goalForm.reset();
+        renderAll();
+      });
+
+      elements.goalEditForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const subjectId = elements.editGoalSubjectId.value;
+        const name = elements.editGoalName.value.trim();
+        const goal = Number(elements.editGoalCount.value);
+
+        if (!name || !Number.isInteger(goal) || goal <= 0) {
+          alert("과목 이름과 목표 문제 수를 올바르게 입력해 주세요.");
+          return;
+        }
+
+        const subject = subjectById(subjectId);
+        if (!subject) return;
+
+        const duplicate = data.subjects.some(
+          (item) =>
+            item.id !== subjectId &&
+            item.name.toLowerCase() === name.toLowerCase()
+        );
+        if (duplicate) {
+          alert("이미 같은 이름의 과목이 있습니다.");
+          return;
+        }
+
+        subject.name = name;
+        data.monthlyGoals[getMonthKey()][subjectId] = goal;
+        saveData();
+        closeGoalModal();
+        renderAll();
+      });
+
+      elements.closeGoalModal.addEventListener("click", closeGoalModal);
+      elements.goalModal.addEventListener("click", (event) => {
+        if (event.target === elements.goalModal) closeGoalModal();
+      });
+
+      elements.prevMonth.addEventListener("click", () => {
+        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+        selectedDateKey = formatDateKey(viewDate);
+        resetRecordForm();
+        renderAll();
+      });
+
+      elements.nextMonth.addEventListener("click", () => {
+        viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
+        selectedDateKey = formatDateKey(viewDate);
+        resetRecordForm();
+        renderAll();
+      });
+
+      elements.todayButton.addEventListener("click", () => {
+        viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        selectedDateKey = formatDateKey(today);
+        resetRecordForm();
+        renderAll();
+      });
+
+      elements.exportButton.addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json"
+        });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = `study-tracker-backup-${formatDateKey(today)}.json`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      elements.importButton.addEventListener("click", () => {
+        elements.importFile.click();
+      });
+
+      elements.importFile.addEventListener("change", async () => {
+        const file = elements.importFile.files?.[0];
+        if (!file) return;
+
+        try {
+          const text = await file.text();
+          const imported = JSON.parse(text);
+
+          if (
+            !imported ||
+            !Array.isArray(imported.subjects) ||
+            !imported.monthlyGoals ||
+            !Array.isArray(imported.records)
+          ) {
+            throw new Error("올바른 백업 파일이 아닙니다.");
+          }
+
+          if (!confirm("현재 데이터를 백업 파일의 내용으로 바꿀까요?")) return;
+
+          data = imported;
+          saveData();
+          resetRecordForm();
+          renderAll();
+          alert("백업을 불러왔습니다.");
+        } catch (error) {
+          console.error(error);
+          alert("백업 파일을 읽지 못했습니다.");
+        } finally {
+          elements.importFile.value = "";
+        }
+      });
+
+      elements.resetButton.addEventListener("click", () => {
+        const firstCheck = confirm("과목, 목표, 학습 기록을 모두 삭제할까요?");
+        if (!firstCheck) return;
+
+        const secondCheck = confirm("정말 삭제할까요? 이 작업은 되돌릴 수 없습니다.");
+        if (!secondCheck) return;
+
+        data = structuredClone(defaultData);
+        saveData();
+        viewDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        selectedDateKey = formatDateKey(today);
+        resetRecordForm();
+        renderAll();
+      });
+
+      elements.recordDate.value = selectedDateKey;
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
